@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // 3) remove const and use TextStyle(fontSize: myFontSize)
+            // 3) remove const and use TextStyle
             Text(
               'You have pushed the button this many times:',
               style: TextStyle(fontSize: myFontSize),
