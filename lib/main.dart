@@ -43,11 +43,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
 
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme
+            .of(context)
+            .colorScheme
+            .inversePrimary,
 
         title: Text(widget.title),
       ),
@@ -66,9 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               myFontSize.toString(), // show slider value with decimals
               style: TextStyle(
-                  fontSize: myFontSize,
-                  fontWeight: FontWeight.bold,
-                 ),
+                fontSize: myFontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 24),
             // 4) Slider updates myFontSize via setNewValue
