@@ -4,22 +4,22 @@ void main() {
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CST2355 - Lab 1',
-        debugShowCheckedModeBanner: false,
-      home: const MyHomePage(title: 'Flutter Demo Home Page')
+      title: 'Flutter Demo',
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -27,66 +27,99 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // 1) _counter uses var, initialized to 0.0
-  var _counter = 0.0;
-  // 3) shared font size variable
-  var myFontSize = 30.0;
+  final _loginCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
+  // Start with question mark (300x300 shown via sizing)
+  String _imageSource = 'Images/question-mark.png';
+  String _imageLabel = 'Question mark icon';
 
-      _counter++;
-    });
+  @override
+  void dispose() {
+    _loginCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
   }
-  // 4) slider handler
-  void setNewValue(double v) => setState(() => myFontSize = v);
+
+  void _onLoginPressed() {
+    final pwd = _passCtrl.text;
+
+    // Rule:
+    // - If password == "QWERTY123" => light bulb
+    // - Else if password != "ASDF" => stop sign
+    // - Else (password == "ASDF") => question mark
+    setState(() {
+      if (pwd == 'QWERTY123') {
+        _imageSource = 'Images/idea.png';
+        _imageLabel = 'Light bulb icon';
+      } else if (pwd != 'ASDF') {
+        _imageSource = 'Images/stop.png';
+        _imageLabel = 'Stop sign icon';
+      } else {
+        _imageSource = 'Images/question-mark.png';
+        _imageLabel = 'Question mark icon';
+      }
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Password entered: $pwd')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-
-        backgroundColor: Theme
-            .of(context)
-            .colorScheme
-            .inversePrimary,
-
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
       body: Center(
-
-        child: Column(
-
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            // 3) remove const and use TextStyle
-            Text(
-              'You have pushed the button this many times:',
-              style: TextStyle(fontSize: myFontSize),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              myFontSize.toString(), // show slider value with decimals
-              style: TextStyle(
-                fontSize: myFontSize,
-                fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Login name
+              TextField(
+                controller: _loginCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Login name',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            // 4) Slider updates myFontSize via setNewValue
-            Slider(
-              value: myFontSize,
-              min: 10,
-              max: 72,
-              onChanged: setNewValue,
-            ),
-          ],
+              const SizedBox(height: 12),
+              // Password (obscured)
+              TextField(
+                controller: _passCtrl,
+                obscureText: true, // required by lab
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Login button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _onLoginPressed,
+                  child: const Text('Login'),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Image 300x300 with Semantics
+              Semantics(
+                label: _imageLabel,
+                child: Image.asset(
+                  _imageSource,
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
