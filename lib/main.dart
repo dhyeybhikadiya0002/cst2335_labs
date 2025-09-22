@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final _loginCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
-  // Start with question mark (300x300 shown via sizing)
+  // Start with question mark
   String _imageSource = 'Images/question-mark.png';
   String _imageLabel = 'Question mark icon';
 
@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onLoginPressed() {
     final pwd = _passCtrl.text;
 
-    // Rule:
+
     // - If password == "QWERTY123" => light bulb
     // - Else if password != "ASDF" => stop sign
     // - Else (password == "ASDF") => question mark
@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Password (obscured)
+              // Password
               TextField(
                 controller: _passCtrl,
                 obscureText: true, // required by lab
@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Image 300x300 with Semantics
+
               Semantics(
                 label: _imageLabel,
                 child: Image.asset(
