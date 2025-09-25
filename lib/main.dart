@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Lab 3 Layouts',
       theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Lab 3 Layouts'),
     );
   }
 }
@@ -21,105 +18,181 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _loginCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
+  int _counter = 0;
+  var isChecked = false;
+  var myFontSize = 0.0;
+  late TextEditingController _controller;
 
-  // Start with question mark
-  String _imageSource = 'Images/question-mark.png';
-  String _imageLabel = 'Question mark icon';
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
 
   @override
   void dispose() {
-    _loginCtrl.dispose();
-    _passCtrl.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
-  void _onLoginPressed() {
-    final pwd = _passCtrl.text;
-
-
-    // - If password == "QWERTY123" => light bulb
-    // - Else if password != "ASDF" => stop sign
-    // - Else (password == "ASDF") => question mark
-    setState(() {
-      if (pwd == 'QWERTY123') {
-        _imageSource = 'Images/idea.png';
-        _imageLabel = 'Light bulb icon';
-      } else if (pwd != 'ASDF') {
-        _imageSource = 'Images/stop.png';
-        _imageLabel = 'Stop sign icon';
-      } else {
-        _imageSource = 'Images/question-mark.png';
-        _imageLabel = 'Question mark icon';
-      }
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Password entered: $pwd')),
-    );
-  }
+  void _incrementCounter() => setState(() => _counter++);
 
   @override
   Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.titleLarge;
+
     return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (i) {},
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Camera'),
+          BottomNavigationBarItem(icon: Icon(Icons.add_a_photo), label: 'Phone'),
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: const [
+            DrawerHeader(child: Text('Menu')),
+            ListTile(title: Text('Page 1')),
+            ListTile(title: Text('Page 2')),
+          ],
+        ),
+      ),
       appBar: AppBar(
+        actions: [
+          OutlinedButton(onPressed: () {}, child: Image.asset("images/algonquin.jpg", height: 32)),
+          OutlinedButton(onPressed: () {}, child: const Text("Exit")),
+        ],
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Login name
-              TextField(
-                controller: _loginCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Login name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Password
-              TextField(
-                controller: _passCtrl,
-                obscureText: true, // required by lab
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Login button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _onLoginPressed,
-                  child: const Text('Login'),
-                ),
-              ),
-              const SizedBox(height: 16),
+      body: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // SpaceBetween (rubric)
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // 1/8 centered text
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('By Protein', style: textStyle),
+            ]),
 
-              Semantics(
-                label: _imageLabel,
-                child: Image.asset(
-                  _imageSource,
-                  width: 300,
-                  height: 300,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ],
-          ),
+            // 2/8 images row with center labels
+            _AvatarRow(items: const [
+              _Item('Beef', 'Images/beef.jpg', _LabelPos.center),
+              _Item('Chicken', 'Images/chicken.jpg', _LabelPos.center),
+              _Item('Pork', 'Images/pork.jpg', _LabelPos.center),
+              _Item('Seafood', 'Images/seafood.jpg', _LabelPos.center),
+            ]),
+
+            // 3/8 left-aligned text
+            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Text('By Course', style: textStyle),
+            ]),
+
+            // 4/8 images row with bottom-center labels
+            _AvatarRow(items: const [
+              _Item('Main dishes', 'Images/maindish.jpg', _LabelPos.bottom),
+              _Item('Salad Recipes', 'Images/salad.jpg', _LabelPos.bottom),
+              _Item('Side Dishes', 'Images/sidedish.jpg', _LabelPos.bottom),
+              _Item('Crockpot', 'Images/crockpot.jpg', _LabelPos.bottom),
+            ]),
+
+            // 5/8 centered text
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('By Dessert', style: textStyle),
+            ]),
+
+            // 6/8 images row with center labels
+            _AvatarRow(items: const [
+              _Item('Ice Cream', 'Images/ice-cream.jpg', _LabelPos.center),
+              _Item('Brownies', 'Images/brownie.jpg', _LabelPos.center),
+              _Item('Pies', 'Images/pie.jpg', _LabelPos.center),
+              _Item('Cookies', 'Images/cookie.jpg', _LabelPos.center),
+            ]),
+
+            // 7/8 centered text
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('New & Popular', style: textStyle),
+            ]),
+
+            // 8/8 centered text
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('Find more in the search bar', style: textStyle),
+            ]),
+          ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+enum _LabelPos { center, bottom }
+
+class _Item {
+  final String label;
+  final String path;
+  final _LabelPos pos;
+  const _Item(this.label, this.path, this.pos);
+}
+
+class _AvatarRow extends StatelessWidget {
+  final List<_Item> items;
+  const _AvatarRow({super.key, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround, // SpaceAround (rubric)
+      children: items.map((e) => _AvatarTile(e)).toList(),
+    );
+  }
+}
+
+class _AvatarTile extends StatelessWidget {
+  final _Item item;
+  const _AvatarTile(this.item, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 90,
+      height: 110,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircleAvatar(
+            backgroundImage: AssetImage(item.path),
+            radius: 42,
+          ),
+          Positioned(
+            bottom: item.pos == _LabelPos.bottom ? 6 : null,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.45),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                item.label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
