@@ -78,6 +78,15 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // SpaceBetween (rubric)
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            //center text for browse category
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Text('BROWSE CATEGORIES', style: textStyle),
+            ]),
+
+            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              Text('Not sure what you are looking for? Do a search or dive into popular categories'),
+            ]),
+
             // 1/8 centered text
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text('By Protein', style: textStyle),
@@ -91,8 +100,8 @@ class _MyHomePageState extends State<MyHomePage> {
               _Item('Seafood', 'Images/seafood.jpg', _LabelPos.center),
             ]),
 
-            // 3/8 left-aligned text
-            Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+            // 3/8 Center text
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               Text('By Course', style: textStyle),
             ]),
 
@@ -111,10 +120,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
             // 6/8 images row with center labels
             _AvatarRow(items: const [
-              _Item('Ice Cream', 'Images/ice-cream.jpg', _LabelPos.center),
-              _Item('Brownies', 'Images/brownie.jpg', _LabelPos.center),
-              _Item('Pies', 'Images/pie.jpg', _LabelPos.center),
-              _Item('Cookies', 'Images/cookie.jpg', _LabelPos.center),
+              _Item('Ice Cream', 'Images/ice-cream.jpg', _LabelPos.bottom),
+              _Item('Brownies', 'Images/brownie.jpg', _LabelPos.bottom),
+              _Item('Pies', 'Images/pie.jpg', _LabelPos.bottom),
+              _Item('Cookies', 'Images/cookie.jpg', _LabelPos.bottom),
             ]),
 
             // 7/8 centered text
