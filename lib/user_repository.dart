@@ -2,27 +2,23 @@
 import 'package:encrypted_shared_preferences/encrypted_shared_preferences.dart';
 
 class UserRepository {
-  final _prefs = EncryptedSharedPreferences();
+  final EncryptedSharedPreferences _prefs = EncryptedSharedPreferences();
 
   String firstName = '';
   String lastName = '';
   String phoneNumber = '';
   String emailAddress = '';
 
-  /// Load user data from EncryptedSharedPreferences
+  // Load data from EncryptedSharedPreferences
   Future<void> loadData() async {
     try {
-      final fn = await _prefs.getString('firstName');
-      final ln = await _prefs.getString('lastName');
-      final pn = await _prefs.getString('phoneNumber');
-      final ea = await _prefs.getString('emailAddress');
-
-      firstName = fn ?? '';
-      lastName = ln ?? '';
-      phoneNumber = pn ?? '';
-      emailAddress = ea ?? '';
+      firstName = await _prefs.getString('firstName') ?? '';
+      lastName = await _prefs.getString('lastName') ?? '';
+      phoneNumber = await _prefs.getString('phoneNumber') ?? '';
+      emailAddress = await _prefs.getString('emailAddress') ?? '';
     } catch (e) {
-      // If any error occurs (e.g., key doesn't exist), use empty strings
+      print('Error loading data: $e');
+      // If keys don't exist yet, just use empty strings
       firstName = '';
       lastName = '';
       phoneNumber = '';
@@ -30,7 +26,7 @@ class UserRepository {
     }
   }
 
-  /// Save user data to EncryptedSharedPreferences
+  // Save data to EncryptedSharedPreferences
   Future<void> saveData() async {
     try {
       await _prefs.setString('firstName', firstName);
@@ -38,7 +34,7 @@ class UserRepository {
       await _prefs.setString('phoneNumber', phoneNumber);
       await _prefs.setString('emailAddress', emailAddress);
     } catch (e) {
-      // Handle any save errors silently
+      print('Error saving data: $e');
     }
   }
 }

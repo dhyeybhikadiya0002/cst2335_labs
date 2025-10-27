@@ -8,10 +8,10 @@ class ProfilePage extends StatefulWidget {
   final UserRepository repository;
 
   const ProfilePage({
-    super.key,
+    Key? key,
     required this.loginName,
     required this.repository,
-  });
+  }) : super(key: key);
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -34,107 +34,121 @@ class _ProfilePageState extends State<ProfilePage> {
     _emailCtrl = TextEditingController(text: widget.repository.emailAddress);
 
     // Add listeners to save data when text changes
-    _firstNameCtrl.addListener(() {
-      widget.repository.firstName = _firstNameCtrl.text;
-      widget.repository.saveData();
-    });
+    _firstNameCtrl.addListener(_onFirstNameChanged);
+    _lastNameCtrl.addListener(_onLastNameChanged);
+    _phoneCtrl.addListener(_onPhoneChanged);
+    _emailCtrl.addListener(_onEmailChanged);
 
-    _lastNameCtrl.addListener(() {
-      widget.repository.lastName = _lastNameCtrl.text;
-      widget.repository.saveData();
-    });
-
-    _phoneCtrl.addListener(() {
-      widget.repository.phoneNumber = _phoneCtrl.text;
-      widget.repository.saveData();
-    });
-
-    _emailCtrl.addListener(() {
-      widget.repository.emailAddress = _emailCtrl.text;
-      widget.repository.saveData();
-    });
-
-    // Show welcome snackbar
+    // Show welcome message
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Welcome Back ${widget.loginName}'),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: 2),
         ),
       );
     });
   }
 
+  void _onFirstNameChanged() {
+    widget.repository.firstName = _firstNameCtrl.text;
+    widget.repository.saveData();
+  }
+
+  void _onLastNameChanged() {
+    widget.repository.lastName = _lastNameCtrl.text;
+    widget.repository.saveData();
+  }
+
+  void _onPhoneChanged() {
+    widget.repository.phoneNumber = _phoneCtrl.text;
+    widget.repository.saveData();
+  }
+
+  void _onEmailChanged() {
+    widget.repository.emailAddress = _emailCtrl.text;
+    widget.repository.saveData();
+  }
+
+  Future<void> _launchPhone() async {
+    final phone = _phoneCtrl.text.trim();
+    if (phone.isEmpty) {
+      _showErrorDialog('Please enter a phone number first');
+      return;
+    }
+
+    final Uri uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        _showErrorDialog('Phone calls are not supported on this device');
+      }
+    }
+  }
+
+  Future<void> _launchSMS() async {
+    final phone = _phoneCtrl.text.trim();
+    if (phone.isEmpty) {
+      _showErrorDialog('Please enter a phone number first');
+      return;
+    }
+
+    final Uri uri = Uri.parse('sms:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        _showErrorDialog('SMS messaging is not supported on this device');
+      }
+    }
+  }
+
+  Future<void> _launchEmail() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty) {
+      _showErrorDialog('Please enter an email address first');
+      return;
+    }
+
+    final Uri uri = Uri.parse('mailto:$email');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        _showErrorDialog('Email is not supported on this device');
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Not Supported'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    _firstNameCtrl.removeListener(_onFirstNameChanged);
+    _lastNameCtrl.removeListener(_onLastNameChanged);
+    _phoneCtrl.removeListener(_onPhoneChanged);
+    _emailCtrl.removeListener(_onEmailChanged);
+
     _firstNameCtrl.dispose();
     _lastNameCtrl.dispose();
     _phoneCtrl.dispose();
     _emailCtrl.dispose();
     super.dispose();
-  }
-
-  Future<void> _launchUrl(String urlString, String type) async {
-    final Uri url = Uri.parse(urlString);
-
-    try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url);
-      } else {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Not Supported'),
-              content: Text('$type is not supported on this device.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Not Supported'),
-            content: Text('$type is not supported on this device.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
-  void _onPhoneCall() {
-    final phone = _phoneCtrl.text;
-    if (phone.isNotEmpty) {
-      _launchUrl('tel:$phone', 'Phone calls');
-    }
-  }
-
-  void _onSms() {
-    final phone = _phoneCtrl.text;
-    if (phone.isNotEmpty) {
-      _launchUrl('sms:$phone', 'SMS');
-    }
-  }
-
-  void _onEmail() {
-    final email = _emailCtrl.text;
-    if (email.isNotEmpty) {
-      _launchUrl('mailto:$email', 'Email');
-    }
   }
 
   @override
@@ -149,11 +163,17 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Welcome message at the top
             Text(
               'Welcome Back ${widget.loginName}',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 24),
+
+            // First Name
             TextField(
               controller: _firstNameCtrl,
               decoration: const InputDecoration(
@@ -161,7 +181,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // Last Name
             TextField(
               controller: _lastNameCtrl,
               decoration: const InputDecoration(
@@ -169,7 +191,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // Phone Number with buttons
             Row(
               children: [
                 Flexible(
@@ -184,17 +208,19 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _onPhoneCall,
+                  onPressed: _launchPhone,
                   child: const Icon(Icons.phone),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _onSms,
+                  onPressed: _launchSMS,
                   child: const Icon(Icons.sms),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // Email Address with button
             Row(
               children: [
                 Flexible(
@@ -209,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: _onEmail,
+                  onPressed: _launchEmail,
                   child: const Icon(Icons.mail),
                 ),
               ],
