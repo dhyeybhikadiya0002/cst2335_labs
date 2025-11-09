@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'shopping_list_database.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,16 +37,41 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
   // List to store shopping items
   final List<ShoppingItem> _shoppingList = [];
 
-  // Method to add item to the list
-  void _addItem() {
+  // Database instance
+  final ShoppingDatabase _database = ShoppingDatabase.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load items from database when app starts
+    _loadItems();
+  }
+
+  // Method to load items from database
+  Future<void> _loadItems() async {
+    final items = await _database.getAllItems();
+    setState(() {
+      _shoppingList.clear();
+      _shoppingList.addAll(items);
+    });
+  }
+
+  // Method to add item to the list and database
+  Future<void> _addItem() async {
     String itemName = _itemController.text.trim();
     String quantityText = _quantityController.text.trim();
 
     if (itemName.isNotEmpty && quantityText.isNotEmpty) {
       int? quantity = int.tryParse(quantityText);
       if (quantity != null && quantity > 0) {
+        // Create the item without an ID
+        ShoppingItem newItem = ShoppingItem(name: itemName, quantity: quantity);
+
+        // Insert into database and get the item with ID
+        ShoppingItem insertedItem = await _database.insert(newItem);
+
         setState(() {
-          _shoppingList.add(ShoppingItem(name: itemName, quantity: quantity));
+          _shoppingList.add(insertedItem);
           // Clear the text fields after adding
           _itemController.clear();
           _quantityController.clear();
@@ -73,9 +99,7 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
             TextButton(
               onPressed: () {
                 // User selected "Yes" - remove the item
-                setState(() {
-                  _shoppingList.removeAt(index);
-                });
+                _deleteItem(index);
                 Navigator.of(context).pop();
               },
               child: const Text('Yes'),
@@ -84,6 +108,20 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
         );
       },
     );
+  }
+
+  // Method to delete item from list and database
+  Future<void> _deleteItem(int index) async {
+    final item = _shoppingList[index];
+
+    // Delete from database if item has an ID
+    if (item.id != null) {
+      await _database.delete(item.id!);
+    }
+
+    setState(() {
+      _shoppingList.removeAt(index);
+    });
   }
 
   @override
@@ -185,12 +223,4 @@ class _ShoppingListPageState extends State<ShoppingListPage> {
       ),
     );
   }
-}
-
-// Model class for shopping items
-class ShoppingItem {
-  final String name;
-  final int quantity;
-
-  ShoppingItem({required this.name, required this.quantity});
 }
