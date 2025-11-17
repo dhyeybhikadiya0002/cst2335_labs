@@ -4,7 +4,6 @@ void main() {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -27,10 +26,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
   final _loginCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
-  // Start with question mark
+  // TEST W2-01:
+  // • Initial image must be question-mark.png.
+  // • Label should read "Question mark icon".
   String _imageSource = 'Images/question-mark.png';
   String _imageLabel = 'Question mark icon';
 
@@ -44,10 +46,22 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onLoginPressed() {
     final pwd = _passCtrl.text;
 
+    /*
+      TEST W2-02: pwd == "QWERTY123"
+        → image = idea.png, label = "Light bulb icon"
+        → SnackBar shows "Password entered: QWERTY123"
 
-    // - If password == "QWERTY123" => light bulb
-    // - Else if password != "ASDF" => stop sign
-    // - Else (password == "ASDF") => question mark
+      TEST W2-03: pwd == "ASDF"
+        → image = question-mark.png
+
+      TEST W2-04: any other password (wrong, empty, random)
+        → image = stop.png
+
+      TEST W2-05:
+        • SnackBar should always show the entered password.
+        • No crash with empty password.
+    */
+
     setState(() {
       if (pwd == 'QWERTY123') {
         _imageSource = 'Images/idea.png';
@@ -62,6 +76,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
+      // TEST W2-06:
+      // • Check that SnackBar appears after every Login press.
+      // • Works for empty, correct, wrong passwords.
       SnackBar(content: Text('Password entered: $pwd')),
     );
   }
@@ -72,6 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
+        // TEST W2-00:
+        // • App loads correctly.
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -79,7 +98,11 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Login name
+
+              // LOGIN FIELD TESTS
+              // TEST W2-L1:
+              // • Type text, delete it, type long text → no crash.
+              // • Does NOT affect image logic.
               TextField(
                 controller: _loginCtrl,
                 decoration: const InputDecoration(
@@ -87,27 +110,44 @@ class _MyHomePageState extends State<MyHomePage> {
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 12),
-              // Password
+
+              // PASSWORD FIELD TESTS
+              // TEST W2-P1:
+              // • obscureText must hide password input.
+              // • Enter empty, ASDF, QWERTY123, wrong text → each triggers different image logic.
               TextField(
                 controller: _passCtrl,
-                obscureText: true, // required by lab
+                obscureText: true,
                 decoration: const InputDecoration(
                   labelText: 'Password',
                   border: OutlineInputBorder(),
                 ),
               ),
+
               const SizedBox(height: 12),
-              // Login button
+
+              // BUTTON TESTS
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _onLoginPressed,
                   child: const Text('Login'),
+                  // TEST W2-B1:
+                  // • Single tap → triggers logic.
+                  // • Double-tap → SnackBar appears twice, app must not crash.
+                  // • Works even if login name is empty.
                 ),
               ),
+
               const SizedBox(height: 16),
 
+              // IMAGE + SEMANTICS TESTS
+              // TEST W2-I1:
+              // • Correct image shown based on password logic.
+              // • Semantics label updates each time.
+              // • Image should update immediately after pressing Login.
               Semantics(
                 label: _imageLabel,
                 child: Image.asset(
