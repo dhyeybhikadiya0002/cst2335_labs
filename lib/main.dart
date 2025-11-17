@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             const SizedBox(height: 24),
-            // 4) Slider updates myFontSize via setNewValue
+            // 4) Slider updates myFontSize via setNewValuew
             Slider(
               value: myFontSize,
               min: 10,
